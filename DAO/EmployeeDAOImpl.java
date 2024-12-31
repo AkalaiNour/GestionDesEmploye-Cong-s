@@ -1,18 +1,29 @@
 package DAO;
 
+import DAO.GenericDAOI;
 import Model.Employee;
 
+
 import java.awt.image.AreaAveragingScaleFilter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.crypto.Data;
 
-public class EmployeeDAOImpl implements GenericDAOI<Employee>{
+
+public class EmployeeDAOImpl implements GenericDAOI<Employee>, DataImportExport<Employee> {
     private Connection connection = DBConnection.getConnection() ;
-    private String sql ;
+    private String sql;
     public EmployeeDAOImpl(){
 
     }
@@ -125,5 +136,61 @@ public class EmployeeDAOImpl implements GenericDAOI<Employee>{
     public   List<Employee.Poste> findAllPostes() {
         return List.of(Employee.Poste.values());
     }
+
+    @Override
+    public void importData(String fileName) {
+        String sql = "INSERT INTO employee (nom, prenom, tel, email, salaire, role, poste) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\hp\\Desktop\\AKALAI\\AKALAI Copier\\src\\Employee.txt"));
+             PreparedStatement stm = connection.prepareStatement(sql)) {
+            String line= reader.readLine();
+            while((line= reader.readLine()) != null){
+                String[] data= line.split(",");
+                if(data.length == 7){
+                    stm.setString(1, data[0].trim());
+                    stm.setString(2, data[1].trim());
+                    stm.setString(3, data[2].trim());
+                    stm.setString(4, data[3].trim());
+                    stm.setDouble(5, Double.parseDouble(data[4].trim()));
+                    stm.setString(6, data[5].trim());
+                    stm.setString(7, data[6].trim());
+                    stm.addBatch();
+                }
+            }
+            stm.executeBatch();
+            System.out.println("Data imported successfully");
+        }catch(IOException | SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+public void exportData(String fileName, List<Employee> data) throws IOException {
+    String query = "SELECT e.Nom, e.Prenom, e.Tel, e.Email, e.Salaire, e.Role, e.Poste " +
+                   "FROM Employee e " +
+                   "JOIN Holidays h ON e.id = h.employee_id";
+
+    try (Connection conn = DBConnection.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(query);
+         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+
+        writer.write("Nom, Prenom, Tel, Email, Salaire, Role, Poste");
+        writer.newLine();
+
+        while (rs.next()) {
+            String line = String.format("%s, %s, %s, %s, %.2f, %s, %s",
+                    rs.getString("Nom"), rs.getString("Prenom"), rs.getString("Tel"),
+                    rs.getString("Email"), rs.getDouble("Salaire"),
+                    rs.getString("Role"), rs.getString("Poste"));
+            writer.write(line);
+            writer.newLine();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+    
+    
 
 }

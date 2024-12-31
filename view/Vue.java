@@ -26,6 +26,8 @@ public class Vue extends JFrame {
     private JButton modifier;
     private JButton supprimer;
     private JButton afficher;
+    public JButton importButton;
+    public JButton exportButton;
     public JButton ajouterButton = new JButton("Ajouter");
     public JButton modifierButton = new JButton("Modifier");
     public JButton supprimerButton = new JButton("Supprimer");
@@ -170,10 +172,14 @@ public class Vue extends JFrame {
         this.modifier = new JButton("Modifier");
         this.supprimer = new JButton("Supprimer");
         this.afficher = new JButton("Afficher");
+        this.importButton = new JButton("Import");
+        this.exportButton = new JButton("Export");
         p4.add(this.ajouter);
         p4.add(this.modifier);
         p4.add(this.supprimer);
         p4.add(this.afficher);
+        p4.add(this.importButton);
+        p4.add(this.exportButton);
 
         setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
@@ -203,6 +209,12 @@ public class Vue extends JFrame {
     public JButton getAfficher() {
         return afficher;
     }
+    public JButton getImport() {
+        return importButton;
+    }
+    public JButton getExport() {
+        return exportButton;
+    }
 
     public JTextField getTel() {
         return tel;
@@ -231,4 +243,15 @@ public class Vue extends JFrame {
     JToggleButton btnEmployes = new JToggleButton("Employés");
     JToggleButton btnConges = new JToggleButton("Congés");
     ButtonGroup group = new ButtonGroup();
+    
+    public void showErrorMessage(String message) {
+
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+
+    }
+    public void showSuccessMessage(String message) {
+
+        JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE);
+
+    }
 }

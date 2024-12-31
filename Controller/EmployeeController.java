@@ -2,12 +2,16 @@ package Controller;
 
 import Model.Employee;
 import Model.EmployeeModel;
+import Model.HolidayModel;
 import view.Vue;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class EmployeeController {
     private final EmployeeModel model;
@@ -16,6 +20,22 @@ public class EmployeeController {
     public EmployeeController(EmployeeModel model, Vue view) {
         this.model = model;
         this.view = view;
+
+        view.importButton.addActionListener(l -> {
+            try {
+                handleImport();
+            } catch (IOException e) {
+                view.showErrorMessage("Erreur lors de l'importation");
+            }
+        });
+
+        view.exportButton.addActionListener(l -> {
+            try {
+                handleExport();
+            } catch (IOException e) {
+                view.showErrorMessage("Erreur lors de l'exportation");
+            }
+        });
 
         initializeListeners();
     }
@@ -195,5 +215,31 @@ public class EmployeeController {
             }
         });
         
+    }
+    private void handleImport() throws IOException{
+        JFileChooser fileChooser= new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichier CSV", "txt"));
+
+        if(fileChooser.showOpenDialog(view)== JFileChooser.APPROVE_OPTION){
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            model.importdata(filePath);
+            view.showSuccessMessage("Importation réussie");
+        }
+    }
+
+    public void handleExport() throws IOException{
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichier CSV", "csv"));
+
+        if(fileChooser.showSaveDialog(view)== JFileChooser.APPROVE_OPTION){
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if(!filePath.toLowerCase().endsWith(".txt")){
+                filePath += ".csv";
+            }
+            List<Employee> employees = model.getAllEmployees();
+            HolidayModel holidayModel = new HolidayModel(null);
+            holidayModel.exportData(filePath, employees);
+            view.showSuccessMessage("Exportation réussie");
+        }
     }
 }

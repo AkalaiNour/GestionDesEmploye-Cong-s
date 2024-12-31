@@ -1,5 +1,6 @@
 package Model;
 
+import java.io.File;
 import java.util.Date;
 
 public class Holiday {
@@ -87,4 +88,5 @@ public class Holiday {
     public void diminuerSolde(int solde) {
         this.solde_reste = getSolde_reste() - solde;
     }
+    
 }
